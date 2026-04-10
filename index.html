@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)file:///Users/merrihua/Downloads/jrs_dashboard_3.html -->
+<html lang="fr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JRS France - Tableau de bord 2025</title>
+<link rel="stylesheet" href="./JRS France - Tableau de bord 2025_files/leaflet.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=Playfair+Display:wght@400;600&display=swap');
+
+:root {
+  --bg: #FAFAF8;
+  --bg-card: #FFFFFF;
+  --bg-surface: #F3F2EE;
+  --text-primary: #1A1A18;
+  --text-secondary: #5E5D5A;
+  --text-tertiary: #8A8984;
+  --border: rgba(0,0,0,0.08);
+  --accent-blue: #2563EB;
+  --accent-teal: #0D9488;
+  --accent-amber: #D97706;
+  --accent-coral: #DC5228;
+  --accent-purple: #7C3AED;
+  --accent-green: #16A34A;
+  --accent-pink: #DB2777;
+  --accent-sky: #0EA5E9;
+  --accent-indigo: #4F46E5;
+  --accent-rose: #E11D48;
+  --accent-lime: #65A30D;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo-mark {
+  width: 40px;
+  height: 40px;
+  background: var(--accent-coral);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+
+.header-subtitle {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.badge-year {
+  background: var(--bg-surface);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 0;
+  height: calc(100vh - 80px);
+}
+
+.map-section {
+  position: relative;
+  min-height: 0;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  z-index: 1;
+}
+
+.sidebar {
+  background: var(--bg-card);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+}
+
+.sidebar-section {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-section:last-child { border-bottom: none; }
+
+.section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.kpi-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.kpi-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.kpi-card.wide { grid-column: 1 / -1; }
+
+.kpi-value {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+
+.kpi-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.kpi-sub {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  border-color: var(--text-tertiary);
+}
+
+.chip.active {
+  color: white;
+  border-color: transparent;
+}
+
+.antenne-detail {
+  display: none;
+  padding: 20px 24px;
+}
+
+.antenne-detail.visible { display: block; }
+
+.antenne-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.antenne-programs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.prog-badge {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.antenne-stats {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.antenne-stat {
+  background: var(--bg-surface);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+}
+
+.antenne-stat-value {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.antenne-stat-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.close-detail {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg-surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.bar-chart-container {
+  margin-top: 8px;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.bar-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  width: 90px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.bar-track {
+  flex: 1;
+  height: 18px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.bar-count {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow-lg) !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  font-family: 'DM Sans', sans-serif !important;
+  min-width: 200px;
+}
+
+.popup-inner {
+  padding: 14px 18px;
+}
+
+.popup-name {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.popup-stat {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+
+.popup-programs {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.map-legend {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  box-shadow: var(--shadow-lg);
+  z-index: 999;
+  font-size: 12px;
+  max-width: 240px;
+}
+
+.legend-title {
+  font-weight: 500;
+  margin-bottom: 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-tertiary);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.circle-marker {
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  transition: transform 0.15s;
+}
+
+.circle-marker:hover {
+  transform: scale(1.2);
+}
+
+@media (max-width: 900px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .sidebar {
+    position: static;
+    max-height: none;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+  #map { min-height: 50vh; height: 50vh; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo-mark">J</div>
+    <div>
+      <h1>JRS France</h1>
+      <div class="header-subtitle">Tableau de bord des programmes - Indicateurs 2025</div>
+    </div>
+  </div>
+  <div class="badge-year">2025</div>
+</div>
+
+<div class="main-grid">
+  <div class="map-section">
+    <div id="map" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom" tabindex="0" style="position: relative;"><div class="leaflet-pane leaflet-map-pane" style="transform: translate3d(0px, 0px, 0px);"><div class="leaflet-pane leaflet-tile-pane"><div class="leaflet-layer " style="z-index: 1; opacity: 1;"><div class="leaflet-tile-container leaflet-zoom-animated" style="z-index: 17; transform: translate3d(0px, 0px, 0px) scale(0.5);"></div><div class="leaflet-tile-container leaflet-zoom-animated" style="z-index: 18; transform: translate3d(281px, 190px, 0px) scale(1);"><img alt="" src="./JRS France - Tableau de bord 2025_files/22@2x.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(141px, 20px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/21@2x.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(141px, -236px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/22@2x(1).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-115px, 20px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/22@2x(2).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(397px, 20px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/23@2x.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(141px, 276px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/21@2x(1).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-115px, -236px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/21@2x(2).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(397px, -236px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/23@2x(1).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-115px, 276px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/23@2x(2).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(397px, 276px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/24@2x.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(141px, 532px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/24@2x(1).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-115px, 532px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/24@2x(2).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(397px, 532px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/22@2x(3).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-371px, 20px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/22@2x(4).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(653px, 20px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/23@2x(3).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-371px, 276px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/23@2x(4).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(653px, 276px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/21@2x(3).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-371px, -236px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/21@2x(4).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(653px, -236px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/24@2x(3).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-371px, 532px, 0px); opacity: 1;"><img alt="" src="./JRS France - Tableau de bord 2025_files/24@2x(4).png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(653px, 532px, 0px); opacity: 1;"></div></div></div><div class="leaflet-pane leaflet-overlay-pane"></div><div class="leaflet-pane leaflet-shadow-pane"></div><div class="leaflet-pane leaflet-marker-pane"><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -22px; margin-top: -22px; width: 44px; height: 44px; transform: translate3d(753px, 554px, 0px); z-index: 554;"><div class="circle-marker" style="width:44px;height:44px;border-radius:50%;background:#1E3A5F;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -18px; margin-top: -18px; width: 36px; height: 36px; transform: translate3d(396px, 309px, 0px); z-index: 309;"><div class="circle-marker" style="width:36px;height:36px;border-radius:50%;background:#1D4ED8;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -10px; margin-top: -10px; width: 20px; height: 20px; transform: translate3d(701px, 413px, 0px); z-index: 413;"><div class="circle-marker" style="width:20px;height:20px;border-radius:50%;background:#93C5FD;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -10px; margin-top: -10px; width: 20px; height: 20px; transform: translate3d(517px, 175px, 0px); z-index: 175;"><div class="circle-marker" style="width:20px;height:20px;border-radius:50%;background:#93C5FD;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -14px; margin-top: -14px; width: 28px; height: 28px; transform: translate3d(696px, 325px, 0px); z-index: 325;"><div class="circle-marker" style="width:28px;height:28px;border-radius:50%;background:#3B82F6;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -14px; margin-top: -14px; width: 28px; height: 28px; transform: translate3d(396px, 482px, 0px); z-index: 482;"><div class="circle-marker" style="width:28px;height:28px;border-radius:50%;background:#3B82F6;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -22px; margin-top: -22px; width: 44px; height: 44px; transform: translate3d(666px, 580px, 0px); z-index: 580;"><div class="circle-marker" style="width:44px;height:44px;border-radius:50%;background:#1E3A5F;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -14px; margin-top: -14px; width: 28px; height: 28px; transform: translate3d(660px, 393px, 0px); z-index: 393;"><div class="circle-marker" style="width:28px;height:28px;border-radius:50%;background:#3B82F6;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -10px; margin-top: -10px; width: 20px; height: 20px; transform: translate3d(405px, 192px, 0px); z-index: 192;"><div class="circle-marker" style="width:20px;height:20px;border-radius:50%;background:#93C5FD;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -10px; margin-top: -10px; width: 20px; height: 20px; transform: translate3d(348px, 160px, 0px); z-index: 160;"><div class="circle-marker" style="width:20px;height:20px;border-radius:50%;background:#93C5FD;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -10px; margin-top: -10px; width: 20px; height: 20px; transform: translate3d(562px, 421px, 0px); z-index: 421;"><div class="circle-marker" style="width:20px;height:20px;border-radius:50%;background:#93C5FD;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -14px; margin-top: -14px; width: 28px; height: 28px; transform: translate3d(651px, 319px, 0px); z-index: 319;"><div class="circle-marker" style="width:28px;height:28px;border-radius:50%;background:#3B82F6;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -22px; margin-top: -22px; width: 44px; height: 44px; transform: translate3d(620px, 546px, 0px); z-index: 546;"><div class="circle-marker" style="width:44px;height:44px;border-radius:50%;background:#1E3A5F;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -18px; margin-top: -18px; width: 36px; height: 36px; transform: translate3d(699px, 500px, 0px); z-index: 500;"><div class="circle-marker" style="width:36px;height:36px;border-radius:50%;background:#1D4ED8;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -10px; margin-top: -10px; width: 20px; height: 20px; transform: translate3d(598px, 560px, 0px); z-index: 560;"><div class="circle-marker" style="width:20px;height:20px;border-radius:50%;background:#93C5FD;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -18px; margin-top: -18px; width: 36px; height: 36px; transform: translate3d(683px, 460px, 0px); z-index: 460;"><div class="circle-marker" style="width:36px;height:36px;border-radius:50%;background:#1D4ED8;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -14px; margin-top: -14px; width: 28px; height: 28px; transform: translate3d(387px, 268px, 0px); z-index: 268;"><div class="circle-marker" style="width:28px;height:28px;border-radius:50%;background:#3B82F6;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -14px; margin-top: -14px; width: 28px; height: 28px; transform: translate3d(431px, 273px, 0px); z-index: 273;"><div class="circle-marker" style="width:28px;height:28px;border-radius:50%;background:#3B82F6;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -14px; margin-top: -14px; width: 28px; height: 28px; transform: translate3d(479px, 418px, 0px); z-index: 418;"><div class="circle-marker" style="width:28px;height:28px;border-radius:50%;background:#3B82F6;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -22px; margin-top: -22px; width: 44px; height: 44px; transform: translate3d(351px, 326px, 0px); z-index: 326;"><div class="circle-marker" style="width:44px;height:44px;border-radius:50%;background:#1E3A5F;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -22px; margin-top: -22px; width: 44px; height: 44px; transform: translate3d(642px, 422px, 0px); z-index: 422;"><div class="circle-marker" style="width:44px;height:44px;border-radius:50%;background:#1E3A5F;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -22px; margin-top: -22px; width: 44px; height: 44px; transform: translate3d(703px, 196px, 0px); z-index: 196;"><div class="circle-marker" style="width:44px;height:44px;border-radius:50%;background:#1E3A5F;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -6px; margin-top: -6px; width: 12px; height: 12px; transform: translate3d(703px, 226px, 0px); z-index: 226;"><div class="circle-marker" style="width:12px;height:12px;border-radius:50%;background:#ccc;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -10px; margin-top: -10px; width: 20px; height: 20px; transform: translate3d(509px, 280px, 0px); z-index: 280;"><div class="circle-marker" style="width:20px;height:20px;border-radius:50%;background:#93C5FD;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -22px; margin-top: -22px; width: 44px; height: 44px; transform: translate3d(529px, 215px, 0px); z-index: 215;"><div class="circle-marker" style="width:44px;height:44px;border-radius:50%;background:#1E3A5F;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -14px; margin-top: -14px; width: 28px; height: 28px; transform: translate3d(351px, 568px, 0px); z-index: 568;"><div class="circle-marker" style="width:28px;height:28px;border-radius:50%;background:#3B82F6;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -10px; margin-top: -10px; width: 20px; height: 20px; transform: translate3d(622px, 443px, 0px); z-index: 443;"><div class="circle-marker" style="width:20px;height:20px;border-radius:50%;background:#93C5FD;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -14px; margin-top: -14px; width: 28px; height: 28px; transform: translate3d(691px, 435px, 0px); z-index: 435;"><div class="circle-marker" style="width:28px;height:28px;border-radius:50%;background:#3B82F6;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -10px; margin-top: -10px; width: 20px; height: 20px; transform: translate3d(775px, 234px, 0px); z-index: 234;"><div class="circle-marker" style="width:20px;height:20px;border-radius:50%;background:#93C5FD;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -18px; margin-top: -18px; width: 36px; height: 36px; transform: translate3d(488px, 560px, 0px); z-index: 560;"><div class="circle-marker" style="width:36px;height:36px;border-radius:50%;background:#1D4ED8;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -10px; margin-top: -10px; width: 20px; height: 20px; transform: translate3d(453px, 314px, 0px); z-index: 314;"><div class="circle-marker" style="width:20px;height:20px;border-radius:50%;background:#93C5FD;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -14px; margin-top: -14px; width: 28px; height: 28px; transform: translate3d(582px, 109px, 0px); z-index: 109;"><div class="circle-marker" style="width:28px;height:28px;border-radius:50%;background:#3B82F6;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -14px; margin-top: -14px; width: 28px; height: 28px; transform: translate3d(641px, 532px, 0px); z-index: 532;"><div class="circle-marker" style="width:28px;height:28px;border-radius:50%;background:#3B82F6;opacity:0.9;"></div></div><div class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -14px; margin-top: -14px; width: 28px; height: 28px; transform: translate3d(513px, 218px, 0px); z-index: 218;"><div class="circle-marker" style="width:28px;height:28px;border-radius:50%;background:#3B82F6;opacity:0.9;"></div></div></div><div class="leaflet-pane leaflet-tooltip-pane"></div><div class="leaflet-pane leaflet-popup-pane"></div><div class="leaflet-proxy leaflet-zoom-animated" style="transform: translate3d(8305px, 5817.75px, 0px) scale(32);"></div></div><div class="leaflet-control-container"><div class="leaflet-top leaflet-left"></div><div class="leaflet-top leaflet-right"><div class="leaflet-control-zoom leaflet-bar leaflet-control"><a class="leaflet-control-zoom-in" href="file:///Users/merrihua/Downloads/jrs_dashboard_3.html#" title="Zoom in" role="button" aria-label="Zoom in" aria-disabled="false"><span aria-hidden="true">+</span></a><a class="leaflet-control-zoom-out" href="file:///Users/merrihua/Downloads/jrs_dashboard_3.html#" title="Zoom out" role="button" aria-label="Zoom out" aria-disabled="false"><span aria-hidden="true">−</span></a></div></div><div class="leaflet-bottom leaflet-left"></div><div class="leaflet-bottom leaflet-right"></div></div></div>
+    <div class="map-legend" id="map-legend">
+      <div class="legend-title">Taille = nb de programmes</div>
+      <div id="legend-items"><div class="legend-item">
+      <div class="legend-dot" style="width:10px;height:10px;background:#3B82F6;"></div>
+      <span>1-2 programmes</span>
+    </div><div class="legend-item">
+      <div class="legend-dot" style="width:14px;height:14px;background:#3B82F6;"></div>
+      <span>3-4 programmes</span>
+    </div><div class="legend-item">
+      <div class="legend-dot" style="width:18px;height:18px;background:#3B82F6;"></div>
+      <span>5-6 programmes</span>
+    </div><div class="legend-item">
+      <div class="legend-dot" style="width:22px;height:22px;background:#3B82F6;"></div>
+      <span>7+ programmes</span>
+    </div></div>
+    </div>
+  </div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-section" id="kpi-section">
+      <div class="section-title">Chiffres cles nationaux</div>
+      <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--accent-coral)">34</div>
+      <div class="kpi-label">Antennes actives</div>
+      
+    </div>
+  
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--accent-purple)">3 558</div>
+      <div class="kpi-label">Benevoles engages</div>
+      
+    </div>
+  
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--accent-blue)">276</div>
+      <div class="kpi-label">Personnes accueillies</div>
+      <div class="kpi-sub">Welcome</div>
+    </div>
+  
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--accent-teal)">35 674</div>
+      <div class="kpi-label">Nuitees Welcome</div>
+      <div class="kpi-sub">evitees</div>
+    </div>
+  
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--accent-sky)">1 090</div>
+      <div class="kpi-label">Lieux d'accueil</div>
+      <div class="kpi-sub">702 ayant accueilli</div>
+    </div>
+  
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--accent-green)">182</div>
+      <div class="kpi-label">Accompagnateurs</div>
+      <div class="kpi-sub">71% retraites</div>
+    </div>
+  
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--accent-coral)">505</div>
+      <div class="kpi-label">Suivis juridiques</div>
+      <div class="kpi-sub">11 antennes</div>
+    </div>
+  
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--accent-amber)">390</div>
+      <div class="kpi-label">Eleves FLE</div>
+      <div class="kpi-sub">126 benevoles</div>
+    </div>
+  
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--accent-purple)">1 761</div>
+      <div class="kpi-label">Participants JRS Jeunes</div>
+      <div class="kpi-sub">921 activites</div>
+    </div>
+  
+    <div class="kpi-card">
+      <div class="kpi-value" style="color:var(--accent-lime)">1 617</div>
+      <div class="kpi-label">Personnes sensibilisees</div>
+      <div class="kpi-sub">48 interventions</div>
+    </div>
+  
+    <div class="kpi-card wide">
+      <div class="kpi-value" style="color:var(--accent-pink)">3 602</div>
+      <div class="kpi-label">Accueillis Oasis</div>
+      <div class="kpi-sub">180 jours, S1</div>
+    </div>
+  </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="section-title">Filtrer par programme</div>
+      <div class="filter-chips" id="filter-chips"><button class="chip active" style="background:var(--text-primary);color:white;" onclick="setFilter(null)">Tous</button><button class="chip " style="" onclick="setFilter(&#39;Welcome&#39;)">Welcome</button><button class="chip " style="" onclick="setFilter(&#39;MAD&#39;)">Mise a dispo</button><button class="chip " style="" onclick="setFilter(&#39;Courts sejours&#39;)">Courts sejours</button><button class="chip " style="" onclick="setFilter(&#39;Ruralite&#39;)">Ruralite</button><button class="chip " style="" onclick="setFilter(&#39;JRS Jeunes&#39;)">JRS Jeunes</button><button class="chip " style="" onclick="setFilter(&#39;Ecole de francais&#39;)">Ecole de francais</button><button class="chip " style="" onclick="setFilter(&#39;Plaidoyer&#39;)">Plaidoyer</button><button class="chip " style="" onclick="setFilter(&#39;Juridique&#39;)">Juridique</button><button class="chip " style="" onclick="setFilter(&#39;Emploi&#39;)">Emploi</button><button class="chip " style="" onclick="setFilter(&#39;Sante&#39;)">Sante</button><button class="chip " style="" onclick="setFilter(&#39;Sensibilisation&#39;)">Sensibilisation</button></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="section-title">Programmes par antenne</div>
+      <div class="bar-chart-container" id="bar-chart">
+      <div class="bar-row">
+        <div class="bar-label">Paris</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:100%;background:var(--accent-blue);opacity:0.7;"></div>
+        </div>
+        <div class="bar-count">9</div>
+      </div>
+    
+      <div class="bar-row">
+        <div class="bar-label">Gard</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:88.88888888888889%;background:var(--accent-blue);opacity:0.7;"></div>
+        </div>
+        <div class="bar-count">8</div>
+      </div>
+    
+      <div class="bar-row">
+        <div class="bar-label">Loire-Atlan.</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:88.88888888888889%;background:var(--accent-blue);opacity:0.7;"></div>
+        </div>
+        <div class="bar-count">8</div>
+      </div>
+    
+      <div class="bar-row">
+        <div class="bar-label">Lyon</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:88.88888888888889%;background:var(--accent-blue);opacity:0.7;"></div>
+        </div>
+        <div class="bar-count">8</div>
+      </div>
+    
+      <div class="bar-row">
+        <div class="bar-label">Metz</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:88.88888888888889%;background:var(--accent-blue);opacity:0.7;"></div>
+        </div>
+        <div class="bar-count">8</div>
+      </div>
+    
+      <div class="bar-row">
+        <div class="bar-label">Alpes-Marit.</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:77.77777777777779%;background:var(--accent-blue);opacity:0.7;"></div>
+        </div>
+        <div class="bar-count">7</div>
+      </div>
+    
+      <div class="bar-row">
+        <div class="bar-label">Bouches-du-.</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:77.77777777777779%;background:var(--accent-blue);opacity:0.7;"></div>
+        </div>
+        <div class="bar-count">7</div>
+      </div>
+    
+      <div class="bar-row">
+        <div class="bar-label">Isere</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:66.66666666666666%;background:var(--accent-blue);opacity:0.7;"></div>
+        </div>
+        <div class="bar-count">6</div>
+      </div>
+    
+      <div class="bar-row">
+        <div class="bar-label">Toulouse</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:66.66666666666666%;background:var(--accent-blue);opacity:0.7;"></div>
+        </div>
+        <div class="bar-count">6</div>
+      </div>
+    
+      <div class="bar-row">
+        <div class="bar-label">Angers</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:55.55555555555556%;background:var(--accent-blue);opacity:0.7;"></div>
+        </div>
+        <div class="bar-count">5</div>
+      </div>
+    
+      <div class="bar-row">
+        <div class="bar-label">Hautes-Alpes</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:55.55555555555556%;background:var(--accent-blue);opacity:0.7;"></div>
+        </div>
+        <div class="bar-count">5</div>
+      </div>
+    
+      <div class="bar-row">
+        <div class="bar-label">Besancon</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:44.44444444444444%;background:var(--accent-blue);opacity:0.7;"></div>
+        </div>
+        <div class="bar-count">4</div>
+      </div>
+    </div>
+    </div>
+
+    <div class="antenne-detail" id="antenne-detail" style="position:relative;">
+      <button class="close-detail" onclick="closeDetail()">×</button>
+    </div>
+  </div>
+</div>
+
+<script src="./JRS France - Tableau de bord 2025_files/leaflet.min.js"></script>
+<script>
+const PROGRAMS = {
+  'Welcome':      { color: '#2563EB', short: 'Welcome' },
+  'MAD':          { color: '#0EA5E9', short: 'Mise a dispo' },
+  'Courts sejours': { color: '#6366F1', short: 'Courts sejours' },
+  'Ruralite':     { color: '#16A34A', short: 'Ruralite' },
+  'JRS Jeunes':   { color: '#7C3AED', short: 'JRS Jeunes' },
+  'Ecole de francais': { color: '#D97706', short: 'Ecole de francais' },
+  'Plaidoyer':    { color: '#DB2777', short: 'Plaidoyer' },
+  'Juridique':    { color: '#DC5228', short: 'Juridique' },
+  'Emploi':       { color: '#0D9488', short: 'Emploi' },
+  'Sante':        { color: '#E11D48', short: 'Sante' },
+  'Sensibilisation': { color: '#65A30D', short: 'Sensibilisation' }
+};
+
+const ANTENNES = [
+  { name:'Alpes-Maritimes', lat:43.7102, lng:7.262, accueillis:17, nuitees:1538, lieux:32, accomp:10, programs:['Welcome','MAD','Ecole de francais','Juridique','Emploi','Sante','Sensibilisation'], juridique:15, fle_eleves:32, sensi_interventions:1, sensi_personnes:100 },
+  { name:'Angers', lat:47.4784, lng:-0.5632, accueillis:6, nuitees:952, lieux:16, accomp:3, programs:['Welcome','Courts sejours','Juridique','Emploi','Sensibilisation'], juridique:5, sensi_interventions:1, sensi_personnes:21 },
+  { name:'Annecy', lat:45.8992, lng:6.1294, accueillis:2, nuitees:150, lieux:5, accomp:2, programs:['Welcome','Sensibilisation'], sensi_interventions:1 },
+  { name:'Beauvais', lat:49.4295, lng:2.0807, accueillis:3, nuitees:257, lieux:6, accomp:1, programs:['Welcome'] },
+  { name:'Besancon', lat:47.2378, lng:6.0241, accueillis:2, nuitees:272, lieux:6, accomp:1, programs:['Welcome','Emploi','Sante','Sensibilisation'], sensi_interventions:4, sensi_personnes:200 },
+  { name:'Bordeaux', lat:44.8378, lng:-0.5792, accueillis:8, nuitees:900, lieux:15, accomp:4, programs:['Welcome','Courts sejours','Ruralite'] },
+  { name:'Bouches-du-Rhone', lat:43.2965, lng:5.3698, accueillis:7, nuitees:964, lieux:16, accomp:4, programs:['Welcome','Courts sejours','JRS Jeunes','Ecole de francais','Emploi','Sante','Sensibilisation'], juridique:3, fle_eleves:80, sensi_interventions:3, sensi_personnes:100 },
+  { name:'Bourg-en-Bresse', lat:46.2056, lng:5.2255, accueillis:6, nuitees:848, lieux:13, accomp:3, programs:['Welcome','MAD','Juridique','Emploi'] },
+  { name:'Calvados', lat:49.1829, lng:-0.3707, accueillis:3, nuitees:389, lieux:12, accomp:2, programs:['Welcome','JRS Jeunes'] },
+  { name:'Cherbourg', lat:49.6337, lng:-1.6222, accueillis:2, nuitees:169, lieux:4, accomp:2, programs:['Welcome'] },
+  { name:'Clermont-Ferrand', lat:45.7772, lng:3.087, accueillis:14, nuitees:1491, lieux:19, accomp:4, programs:['Welcome','JRS Jeunes'] },
+  { name:'Dijon', lat:47.322, lng:5.0415, accueillis:5, nuitees:420, lieux:12, accomp:2, programs:['Welcome','JRS Jeunes','Sensibilisation'], sensi_interventions:1, sensi_personnes:12 },
+  { name:'Gard', lat:43.8367, lng:4.3601, accueillis:6, nuitees:1154, lieux:32, accomp:4, programs:['Welcome','JRS Jeunes','Ecole de francais','Plaidoyer','Juridique','Emploi','Sante','Sensibilisation'], juridique:2, sensi_interventions:1, sensi_personnes:100 },
+  { name:'Hautes-Alpes', lat:44.5588, lng:6.0795, accueillis:2, nuitees:534, lieux:10, accomp:2, programs:['Welcome','Plaidoyer','Emploi','Sante','Sensibilisation'], juridique:100, sensi_interventions:3, sensi_personnes:10 },
+  { name:'Herault', lat:43.6108, lng:3.8767, accueillis:16, nuitees:1642, lieux:40, accomp:7, programs:['Welcome','Juridique'], fle_eleves:4 },
+  { name:'Isere', lat:45.1885, lng:5.7245, accueillis:17, nuitees:1535, lieux:61, accomp:10, programs:['Welcome','MAD','Plaidoyer','Emploi','Sensibilisation','JRS Jeunes'], sensi_interventions:1, sensi_personnes:50 },
+  { name:'Laval', lat:48.0735, lng:-0.7714, accueillis:2, nuitees:174, lieux:7, accomp:2, programs:['Welcome','Emploi','Sensibilisation'], sensi_interventions:2, sensi_personnes:17 },
+  { name:'Le Mans', lat:48.006, lng:0.1996, accueillis:5, nuitees:613, lieux:18, accomp:5, programs:['Welcome','Ruralite','Emploi','Sensibilisation'], sensi_interventions:6, sensi_personnes:130 },
+  { name:'Limoges', lat:45.8336, lng:1.2611, accueillis:4, nuitees:673, lieux:10, accomp:2, programs:['Welcome','JRS Jeunes','Ecole de francais','Emploi'], fle_eleves:11 },
+  { name:'Loire-Atlantique', lat:47.2184, lng:-1.5536, accueillis:9, nuitees:706, lieux:23, accomp:5, programs:['Welcome','Courts sejours','JRS Jeunes','Ecole de francais','Plaidoyer','Juridique','Emploi','Sensibilisation'], juridique:10, fle_eleves:62, sensi_interventions:8, sensi_personnes:640 },
+  { name:'Lyon', lat:45.764, lng:4.8357, accueillis:28, nuitees:3879, lieux:40, accomp:19, programs:['Welcome','MAD','JRS Jeunes','Ecole de francais','Plaidoyer','Juridique','Emploi','Sensibilisation'], juridique:28, fle_eleves:7, sensi_interventions:4 },
+  { name:'Metz', lat:49.1193, lng:6.1757, accueillis:3, nuitees:454, lieux:19, accomp:3, programs:['Welcome','MAD','Courts sejours','Ecole de francais','Plaidoyer','Juridique','Emploi','Sensibilisation'], juridique:54, fle_eleves:80, sensi_interventions:3, sensi_personnes:62 },
+  { name:'Nancy', lat:48.6921, lng:6.1844, accueillis:0, nuitees:0, lieux:0, accomp:0, programs:[] },
+  { name:'Orleans', lat:47.9029, lng:1.9039, accueillis:2, nuitees:129, lieux:6, accomp:1, programs:['Welcome'] },
+  { name:'Paris', lat:48.8566, lng:2.3522, accueillis:22, nuitees:3691, lieux:69, accomp:23, programs:['Welcome','MAD','Courts sejours','JRS Jeunes','Ecole de francais','Juridique','Emploi','Sante','Sensibilisation'], juridique:285, fle_eleves:106, sensi_interventions:1, sensi_personnes:75 },
+  { name:'Pays Basque', lat:43.4832, lng:-1.5586, accueillis:2, nuitees:262, lieux:7, accomp:2, programs:['Welcome','MAD','Sante'] },
+  { name:'Saint-Etienne', lat:45.4397, lng:4.3872, accueillis:7, nuitees:758, lieux:22, accomp:8, programs:['Welcome','JRS Jeunes'] },
+  { name:'Savoie', lat:45.5646, lng:5.9178, accueillis:5, nuitees:556, lieux:16, accomp:4, programs:['Welcome','Sensibilisation','JRS Jeunes'] },
+  { name:'Strasbourg', lat:48.5734, lng:7.7521, accueillis:2, nuitees:231, lieux:10, accomp:2, programs:['Welcome','Plaidoyer'] },
+  { name:'Toulouse', lat:43.6047, lng:1.4442, accueillis:36, nuitees:4072, lieux:47, accomp:20, programs:['Welcome','MAD','JRS Jeunes','Plaidoyer','Sante','Sensibilisation'], sensi_interventions:6, sensi_personnes:50 },
+  { name:'Tours', lat:47.3941, lng:0.6848, accueillis:4, nuitees:627, lieux:17, accomp:3, programs:['Welcome'] },
+  { name:'Valenciennes', lat:50.3597, lng:3.5232, accueillis:3, nuitees:413, lieux:8, accomp:2, programs:['Welcome','Juridique','Emploi'], juridique:1 },
+  { name:'Vaucluse', lat:44.0577, lng:4.8055, accueillis:4, nuitees:476, lieux:10, accomp:2, programs:['Welcome','Juridique','Sensibilisation'], juridique:2, sensi_interventions:1, sensi_personnes:50 },
+  { name:'Yvelines', lat:48.8048, lng:1.9888, accueillis:22, nuitees:4745, lieux:74, accomp:18, programs:['Welcome','Emploi','Sante'] }
+];
+
+const NATIONAL_KPIS = [
+  { value: '34', label: 'Antennes actives', icon: '', color: 'var(--accent-coral)' },
+  { value: '3 558', label: 'Benevoles engages', icon: '', color: 'var(--accent-purple)' },
+  { value: '276', label: 'Personnes accueillies', sub: 'Welcome', color: 'var(--accent-blue)' },
+  { value: '35 674', label: 'Nuitees Welcome', sub: 'evitees', color: 'var(--accent-teal)' },
+  { value: '1 090', label: "Lieux d'accueil", sub: '702 ayant accueilli', color: 'var(--accent-sky)' },
+  { value: '182', label: 'Accompagnateurs', sub: '71% retraites', color: 'var(--accent-green)' },
+  { value: '505', label: 'Suivis juridiques', sub: '11 antennes', color: 'var(--accent-coral)' },
+  { value: '390', label: "Eleves FLE", sub: '126 benevoles', color: 'var(--accent-amber)' },
+  { value: '1 761', label: 'Participants JRS Jeunes', sub: '921 activites', color: 'var(--accent-purple)' },
+  { value: '1 617', label: 'Personnes sensibilisees', sub: '48 interventions', color: 'var(--accent-lime)' },
+  { value: '3 602', label: 'Accueillis Oasis', sub: '180 jours, S1', wide: true, color: 'var(--accent-pink)' }
+];
+
+let map, markers = [], activeFilter = null;
+
+function init() {
+  initMap();
+  renderKPIs();
+  renderFilters();
+  renderBarChart();
+  renderLegend();
+  plotMarkers();
+}
+
+function initMap() {
+  map = L.map('map', {
+    center: [46.6, 2.5],
+    zoom: 6,
+    zoomControl: false,
+    attributionControl: false
+  });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 18
+  }).addTo(map);
+  L.control.zoom({ position: 'topright' }).addTo(map);
+  setTimeout(function(){ map.invalidateSize(); }, 200);
+  window.addEventListener('resize', function(){ map.invalidateSize(); });
+}
+
+function getMarkerSize(numPrograms) {
+  if (numPrograms === 0) return 6;
+  if (numPrograms <= 2) return 10;
+  if (numPrograms <= 4) return 14;
+  if (numPrograms <= 6) return 18;
+  return 22;
+}
+
+function getMarkerColor(a) {
+  if (activeFilter) {
+    return a.programs.includes(activeFilter) ? PROGRAMS[activeFilter].color : '#ccc';
+  }
+  const n = a.programs.length;
+  if (n === 0) return '#ccc';
+  if (n <= 2) return '#93C5FD';
+  if (n <= 4) return '#3B82F6';
+  if (n <= 6) return '#1D4ED8';
+  return '#1E3A5F';
+}
+
+function plotMarkers() {
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+
+  ANTENNES.forEach(a => {
+    if (a.programs.length === 0 && activeFilter) return;
+    if (activeFilter && !a.programs.includes(activeFilter)) return;
+
+    const size = getMarkerSize(a.programs.length);
+    const color = getMarkerColor(a);
+
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="circle-marker" style="width:${size*2}px;height:${size*2}px;border-radius:50%;background:${color};opacity:0.9;"></div>`,
+      iconSize: [size*2, size*2],
+      iconAnchor: [size, size]
+    });
+
+    const marker = L.marker([a.lat, a.lng], { icon }).addTo(map);
+
+    const progBadges = a.programs.map(p =>
+      `<span class="prog-badge" style="background:${PROGRAMS[p].color}15;color:${PROGRAMS[p].color}">${PROGRAMS[p].short}</span>`
+    ).join('');
+
+    marker.bindPopup(`
+      <div class="popup-inner">
+        <div class="popup-name">${a.name}</div>
+        <div class="popup-stat">${a.accueillis} accueillis - ${a.nuitees.toLocaleString('fr')} nuitees</div>
+        <div class="popup-stat">${a.lieux} lieux - ${a.accomp} accompagnateurs</div>
+        <div class="popup-programs">${progBadges}</div>
+      </div>
+    `, { closeButton: false });
+
+    marker.on('click', () => showDetail(a));
+    markers.push(marker);
+  });
+}
+
+function renderKPIs() {
+  const grid = document.getElementById('kpi-grid');
+  grid.innerHTML = NATIONAL_KPIS.map(k => `
+    <div class="kpi-card${k.wide ? ' wide' : ''}">
+      <div class="kpi-value" style="color:${k.color}">${k.value}</div>
+      <div class="kpi-label">${k.label}</div>
+      ${k.sub ? `<div class="kpi-sub">${k.sub}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function renderFilters() {
+  const container = document.getElementById('filter-chips');
+  container.innerHTML = `<button class="chip ${!activeFilter ? 'active' : ''}" style="${!activeFilter ? 'background:var(--text-primary);color:white;' : ''}" onclick="setFilter(null)">Tous</button>` +
+    Object.entries(PROGRAMS).map(([name, p]) =>
+      `<button class="chip ${activeFilter === name ? 'active' : ''}" style="${activeFilter === name ? `background:${p.color};color:white;border-color:${p.color};` : ''}" onclick="setFilter('${name}')">${p.short}</button>`
+    ).join('');
+}
+
+function setFilter(program) {
+  activeFilter = program;
+  renderFilters();
+  plotMarkers();
+  renderBarChart();
+}
+
+function renderBarChart() {
+  const container = document.getElementById('bar-chart');
+  let data = ANTENNES.filter(a => a.programs.length > 0).map(a => ({
+    name: a.name,
+    count: activeFilter ? (a.programs.includes(activeFilter) ? 1 : 0) : a.programs.length
+  })).filter(d => d.count > 0).sort((a, b) => b.count - a.count).slice(0, 12);
+
+  const max = Math.max(...data.map(d => d.count));
+
+  container.innerHTML = data.map(d => {
+    const pct = (d.count / max * 100);
+    const color = activeFilter ? PROGRAMS[activeFilter].color : 'var(--accent-blue)';
+    return `
+      <div class="bar-row">
+        <div class="bar-label">${d.name.length > 12 ? d.name.slice(0,11) + '.' : d.name}</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${pct}%;background:${color};opacity:0.7;"></div>
+        </div>
+        <div class="bar-count">${d.count}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderLegend() {
+  const items = document.getElementById('legend-items');
+  const sizes = [
+    { label: '1-2 programmes', size: 10 },
+    { label: '3-4 programmes', size: 14 },
+    { label: '5-6 programmes', size: 18 },
+    { label: '7+ programmes', size: 22 }
+  ];
+  items.innerHTML = sizes.map(s =>
+    `<div class="legend-item">
+      <div class="legend-dot" style="width:${s.size}px;height:${s.size}px;background:#3B82F6;"></div>
+      <span>${s.label}</span>
+    </div>`
+  ).join('');
+}
+
+function showDetail(a) {
+  const detail = document.getElementById('antenne-detail');
+  const progBadges = a.programs.map(p =>
+    `<span class="prog-badge" style="background:${PROGRAMS[p].color}20;color:${PROGRAMS[p].color}">${p}</span>`
+  ).join('');
+
+  let statsHtml = '';
+  if (a.accueillis > 0) statsHtml += `<div class="antenne-stat"><div class="antenne-stat-value">${a.accueillis}</div><div class="antenne-stat-label">Accueillis Welcome</div></div>`;
+  if (a.nuitees > 0) statsHtml += `<div class="antenne-stat"><div class="antenne-stat-value">${a.nuitees.toLocaleString('fr')}</div><div class="antenne-stat-label">Nuitees</div></div>`;
+  if (a.lieux > 0) statsHtml += `<div class="antenne-stat"><div class="antenne-stat-value">${a.lieux}</div><div class="antenne-stat-label">Lieux d'accueil</div></div>`;
+  if (a.accomp > 0) statsHtml += `<div class="antenne-stat"><div class="antenne-stat-value">${a.accomp}</div><div class="antenne-stat-label">Accompagnateurs</div></div>`;
+  if (a.juridique) statsHtml += `<div class="antenne-stat"><div class="antenne-stat-value">${a.juridique}</div><div class="antenne-stat-label">Suivis juridiques</div></div>`;
+  if (a.fle_eleves) statsHtml += `<div class="antenne-stat"><div class="antenne-stat-value">${a.fle_eleves}</div><div class="antenne-stat-label">Eleves FLE</div></div>`;
+
+  detail.innerHTML = `
+    <button class="close-detail" onclick="closeDetail()">&times;</button>
+    <div class="antenne-name">${a.name}</div>
+    <div style="font-size:12px;color:var(--text-secondary);">${a.programs.length} programme${a.programs.length > 1 ? 's' : ''} actif${a.programs.length > 1 ? 's' : ''}</div>
+    <div class="antenne-programs">${progBadges}</div>
+    <div class="antenne-stats">${statsHtml}</div>
+  `;
+  detail.classList.add('visible');
+}
+
+function closeDetail() {
+  document.getElementById('antenne-detail').classList.remove('visible');
+}
+
+init();
+</script>
+
+
+</body></html>
