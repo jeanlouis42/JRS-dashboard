@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JRS France - Tableau de bord 2025</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=Playfair+Display:wght@400;600&display=swap');
+:root{--bg:#FAFAF8;--bg2:#FFF;--bg3:#F3F2EE;--tp:#1A1A18;--ts:#5E5D5A;--tt:#8A8984;--bd:rgba(0,0,0,.08);--blue:#2563EB;--teal:#0D9488;--amber:#D97706;--coral:#DC5228;--purple:#7C3AED;--green:#16A34A;--pink:#DB2777;--sky:#0EA5E9;--lime:#65A30D;--rose:#E11D48;--r:12px;--rs:8px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tp);line-height:1.5}
+.hdr{background:var(--bg2);border-bottom:1px solid var(--bd);padding:11px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1000}
+.hdr-l{display:flex;align-items:center;gap:10px}
+.logo{width:32px;height:32px;background:var(--coral);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Playfair Display',serif;font-weight:600;font-size:14px}
+.hdr h1{font-family:'Playfair Display',serif;font-size:17px;font-weight:600}
+.hdr-sub{font-size:10px;color:var(--tt)}
+.badge{background:var(--bg3);padding:3px 10px;border-radius:16px;font-size:10px;font-weight:500;color:var(--ts)}
+.grid{display:grid;grid-template-columns:1fr 340px;height:calc(100vh - 52px)}
+.map-s{position:relative;min-height:0}
+#map{width:100%;height:100%;min-height:400px;z-index:1}
+.sb{background:var(--bg2);border-left:1px solid var(--bd);overflow-y:auto}
+.sec{padding:10px 14px;border-bottom:1px solid var(--bd)}.sec:last-child{border-bottom:none}
+.st{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--tt);font-weight:500;margin-bottom:6px}
+.vtog{display:flex;background:var(--bg3);border-radius:6px;padding:2px;gap:1px;flex-wrap:wrap}
+.vb{flex:1;padding:5px 2px;border:none;border-radius:4px;background:transparent;font-family:inherit;font-size:9px;font-weight:500;color:var(--tt);cursor:pointer;transition:all .12s;text-align:center;white-space:nowrap;min-width:55px}
+.vb:hover{color:var(--ts)}.vb.on{background:var(--bg2);color:var(--tp);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.kpi-header{display:flex;justify-content:space-between;align-items:center}
+.kpi-reset{font-size:8px;color:var(--blue);cursor:pointer;border:none;background:none;font-family:inherit;font-weight:500;padding:2px 6px;border-radius:10px;display:none}
+.kpi-reset:hover{background:rgba(37,99,235,.08)}
+.kpi-reset.vis{display:inline-block}
+.kg{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.kc{background:var(--bg3);border-radius:var(--rs);padding:8px 10px;transition:all .2s}
+.kc.w{grid-column:1/-1}
+.kv{font-size:17px;font-weight:600;letter-spacing:-.4px;line-height:1.1}
+.kl{font-size:8px;color:var(--ts);margin-top:1px}
+.ks{font-size:7px;color:var(--tt);margin-top:1px}
+.fc{display:flex;flex-wrap:wrap;gap:3px}
+.ch{padding:3px 7px;border-radius:14px;font-size:8px;font-weight:500;cursor:pointer;border:1.5px solid var(--bd);background:transparent;color:var(--ts);transition:all .12s;white-space:nowrap;font-family:inherit}
+.ch:hover{border-color:var(--tt)}.ch.on{color:#fff;border-color:transparent}
+.bc{margin-top:2px}
+.br{display:flex;align-items:center;gap:3px;margin-bottom:2px}
+.bl{font-size:8px;color:var(--ts);width:70px;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btr{flex:1;height:12px;background:var(--bg);border-radius:2px;overflow:hidden}
+.bfi{height:100%;border-radius:2px;transition:width .4s}
+.bn{font-size:8px;color:var(--tt);width:36px;flex-shrink:0;font-weight:500}
+.ad{display:none;padding:12px 14px}.ad.vis{display:block}
+.an{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;margin-bottom:1px}
+.ap{display:flex;flex-wrap:wrap;gap:2px;margin-top:4px}
+.pb{font-size:7px;padding:2px 5px;border-radius:8px;font-weight:500}
+.as{margin-top:7px;display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.asi{background:var(--bg3);padding:5px 8px;border-radius:var(--rs)}
+.asv{font-size:14px;font-weight:600}.asl{font-size:7px;color:var(--ts)}
+.cb{position:absolute;top:7px;right:7px;width:20px;height:20px;border-radius:50%;border:none;background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--ts)}
+.leaflet-popup-content-wrapper{border-radius:var(--r)!important;box-shadow:0 4px 16px rgba(0,0,0,.08)!important;padding:0!important}
+.leaflet-popup-content{margin:0!important;font-family:'DM Sans',sans-serif!important;min-width:210px}
+.pi{padding:9px 12px}.pn{font-weight:600;font-size:12px;margin-bottom:3px}
+.pst{font-size:9px;color:var(--ts);margin-bottom:1px}
+.pp{margin-top:3px;display:flex;flex-wrap:wrap;gap:2px}
+.ml{position:absolute;bottom:10px;left:10px;background:var(--bg2);border-radius:var(--r);padding:8px 11px;box-shadow:0 4px 16px rgba(0,0,0,.08);z-index:999;font-size:9px;max-width:200px}
+.mlt{font-weight:500;margin-bottom:3px;font-size:8px;text-transform:uppercase;letter-spacing:.7px;color:var(--tt)}
+.mli{display:flex;align-items:center;gap:5px;margin-bottom:2px;color:var(--ts);font-size:9px}
+.ld{border-radius:50%;flex-shrink:0}
+.cm{border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .12s}.cm:hover{transform:scale(1.15)}
+.score-row{display:flex;align-items:center;gap:3px;margin-bottom:2px}
+.score-label{font-size:8px;color:var(--ts);width:60px;text-align:right;flex-shrink:0}
+.score-dots{display:flex;gap:2px;flex:1}
+.score-dot{width:12px;height:12px;border-radius:2px;background:var(--bg);border:1px solid var(--bd)}
+.score-dot.on{border-color:transparent}
+.score-val{font-size:8px;font-weight:600;width:14px;text-align:center;flex-shrink:0}
+.cdm-tag{display:inline-block;padding:2px 7px;border-radius:8px;font-size:8px;font-weight:500;margin-bottom:4px}
+.ts-big{font-size:20px;font-weight:600;letter-spacing:-.4px}
+.ts-label{font-size:8px;color:var(--ts)}
+@media(max-width:900px){.grid{grid-template-columns:1fr;height:auto}.sb{border-left:none;border-top:1px solid var(--bd)}#map{min-height:50vh;height:50vh}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-l"><div class="logo">J</div><div><h1>JRS France</h1><div class="hdr-sub">Tableau de bord des programmes - Indicateurs 2025</div></div></div>
+  <div class="badge">2025</div>
+</div>
+<div class="grid">
+  <div class="map-s"><div id="map"></div><div class="ml" id="ml"></div></div>
+  <div class="sb">
+    <div class="sec">
+      <div class="st">Visualiser sur la carte</div>
+      <div class="vtog">
+        <button class="vb on" data-v="programmes" onclick="setV('programmes')">Programmes</button>
+        <button class="vb" data-v="beneficiaires" onclick="setV('beneficiaires')">Beneficiaires</button>
+        <button class="vb" data-v="benevoles" onclick="setV('benevoles')">Benevoles</button>
+        <button class="vb" data-v="scoring" onclick="setV('scoring')">Scoring</button>
+        <button class="vb" data-v="cdm" onclick="setV('cdm')">Par CdM</button>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="kpi-header"><div class="st" id="kpi-title">Chiffres cles nationaux</div><button class="kpi-reset" id="kpi-reset" onclick="resetKPI()">&#x2190; National</button></div>
+      <div class="kg" id="kg"></div>
+    </div>
+    <div class="sec">
+      <div class="st">Filtrer par programme</div>
+      <div class="fc" id="fc"></div>
+    </div>
+    <div class="sec">
+      <div class="st" id="bt">Programmes par antenne</div>
+      <div class="bc" id="bc"></div>
+    </div>
+    <div class="ad" id="ad" style="position:relative"></div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+var PR={
+  'Welcome':{c:'#2563EB',s:'Welcome'},'Mise a disposition':{c:'#0EA5E9',s:'Mise a disposition'},
+  'Courts sejours':{c:'#6366F1',s:'Courts sejours'},'Ruralite':{c:'#16A34A',s:'Ruralite'},
+  'JRS Jeunes':{c:'#7C3AED',s:'JRS Jeunes'},'Ecole de francais':{c:'#D97706',s:'Ecole de francais'},
+  'Plaidoyer':{c:'#DB2777',s:'Plaidoyer'},'Juridique':{c:'#DC5228',s:'Juridique'},
+  'Emploi':{c:'#0D9488',s:'Emploi et formation'},'Sante':{c:'#E11D48',s:'Sante'},
+  'Sensibilisation':{c:'#65A30D',s:'Sensibilisation'}
+};
+var CDM_COLORS={Amans:'#2563EB',Jeanne:'#7C3AED',Lucie:'#DC5228',Madeleine:'#D97706',Sophie:'#0D9488',Thomas:'#16A34A','-':'#ccc'};
+
+var D=[
+{n:'Alpes-Maritimes',lat:43.7102,lng:7.262,p:['Welcome','Mise a disposition','Ecole de francais','Juridique','Emploi','Sante','Sensibilisation'],b:{Welcome:17,Juridique:15,'Ecole de francais':32,Emploi:14,Sensibilisation:100},tb:178,v:{Welcome:74,Juridique:3,'Ecole de francais':15,Emploi:3,Sensibilisation:1},tv:96,acc:17,nuit:1538,lx:60,lxe:32,ac:10,cdm:'Jeanne',sc:{total:3.23,welcome:2.97,prog:4,vitalite:4,coordo:3,acteurs:4}},
+{n:'Angers',lat:47.4784,lng:-0.5632,p:['Welcome','Courts sejours','Juridique','Emploi','Sensibilisation'],b:{Welcome:6,Juridique:5,Emploi:6,Sensibilisation:21},tb:38,v:{Welcome:35,Juridique:2,Emploi:5},tv:42,acc:6,nuit:952,lx:20,lxe:16,ac:3,cdm:'Amans',sc:{total:3.08,welcome:3.06,prog:2,vitalite:3,coordo:3,acteurs:4}},
+{n:'Annecy',lat:45.8992,lng:6.1294,p:['Welcome','Sensibilisation'],b:{Welcome:2},tb:2,v:{Welcome:12,Sensibilisation:3},tv:15,acc:2,nuit:150,lx:15,lxe:5,ac:2,cdm:'Jeanne',sc:{total:2.29,welcome:2.28,prog:0,vitalite:1,coordo:3,acteurs:3}},
+{n:'Beauvais',lat:49.4295,lng:2.0807,p:['Welcome'],b:{Welcome:3},tb:3,v:{Welcome:13},tv:13,acc:3,nuit:257,lx:6,lxe:6,ac:1,cdm:'Lucie',sc:{total:1.71,welcome:2.32,prog:0,vitalite:1,coordo:1,acteurs:2}},
+{n:'Besancon',lat:47.2378,lng:6.0241,p:['Welcome','Emploi','Sante','Sensibilisation'],b:{Welcome:2,Emploi:1,Sensibilisation:200},tb:203,v:{Welcome:13,Emploi:3,Sensibilisation:6},tv:22,acc:2,nuit:272,lx:8,lxe:6,ac:1,cdm:'Amans',sc:{total:3.23,welcome:3.76,prog:2,vitalite:2,coordo:3,acteurs:3}},
+{n:'Bordeaux',lat:44.8378,lng:-0.5792,p:['Welcome','Courts sejours','Ruralite'],b:{Welcome:8,Ruralite:2},tb:10,v:{Welcome:34,Ruralite:9},tv:43,acc:8,nuit:900,lx:30,lxe:15,ac:4,cdm:'Lucie',sc:{total:2.16,welcome:2.83,prog:0,vitalite:2,coordo:1,acteurs:3}},
+{n:'Bouches-du-Rhone',lat:43.2965,lng:5.3698,p:['Welcome','Courts sejours','JRS Jeunes','Ecole de francais','Emploi','Sante','Sensibilisation'],b:{Welcome:7,'JRS Jeunes':100,'Ecole de francais':80,Emploi:4,Sensibilisation:100},tb:291,v:{Welcome:36,'Ecole de francais':12,Emploi:1,Sensibilisation:7},tv:56,acc:7,nuit:964,lx:20,lxe:16,ac:4,cdm:'Thomas',sc:{total:3.06,welcome:2.32,prog:4,vitalite:5,coordo:4,acteurs:2}},
+{n:'Bourg-en-Bresse',lat:46.2056,lng:5.2255,p:['Welcome','Mise a disposition','Juridique','Emploi'],b:{Welcome:6,Emploi:3},tb:9,v:{Welcome:29,Emploi:1},tv:30,acc:6,nuit:848,lx:20,lxe:13,ac:3,cdm:'Thomas',sc:{total:3.92,welcome:3.93,prog:1,vitalite:4,coordo:4,acteurs:5}},
+{n:'Calvados',lat:49.1829,lng:-0.3707,p:['Welcome','JRS Jeunes'],b:{Welcome:3,'JRS Jeunes':70},tb:73,v:{Welcome:26,'JRS Jeunes':13},tv:39,acc:3,nuit:389,lx:20,lxe:12,ac:2,cdm:'Amans',sc:{total:3.07,welcome:2.94,prog:1,vitalite:4,coordo:3,acteurs:4}},
+{n:'Cherbourg',lat:49.6337,lng:-1.6222,p:['Welcome'],b:{Welcome:2},tb:2,v:{Welcome:10},tv:10,acc:2,nuit:169,lx:10,lxe:4,ac:2,cdm:'Lucie',sc:{total:2.87,welcome:3.24,prog:0,vitalite:2,coordo:3,acteurs:3}},
+{n:'Clermont-Ferrand',lat:45.7772,lng:3.087,p:['Welcome','JRS Jeunes'],b:{Welcome:14,'JRS Jeunes':211},tb:225,v:{Welcome:42,'JRS Jeunes':4},tv:46,acc:14,nuit:1491,lx:22,lxe:19,ac:4,cdm:'Madeleine',sc:{total:3.29,welcome:3.57,prog:1,vitalite:4,coordo:3,acteurs:3}},
+{n:'Dijon',lat:47.322,lng:5.0415,p:['Welcome','JRS Jeunes','Sensibilisation'],b:{Welcome:5,'JRS Jeunes':10,Sensibilisation:12},tb:27,v:{Welcome:26,Sensibilisation:1},tv:27,acc:5,nuit:420,lx:12,lxe:12,ac:2,cdm:'Sophie',sc:{total:2.59,welcome:3.58,prog:1,vitalite:2,coordo:1,acteurs:3}},
+{n:'Gard',lat:43.8367,lng:4.3601,p:['Welcome','JRS Jeunes','Ecole de francais','Plaidoyer','Juridique','Emploi','Sante','Sensibilisation'],b:{Welcome:6,Juridique:2,Emploi:2,Sensibilisation:100},tb:110,v:{Welcome:68,Juridique:6,'Ecole de francais':2,Emploi:4,Sensibilisation:1},tv:81,acc:6,nuit:1154,lx:46,lxe:32,ac:4,cdm:'Jeanne',sc:{total:3.28,welcome:2.96,prog:5,vitalite:4,coordo:3,acteurs:4}},
+{n:'Hautes-Alpes',lat:44.5588,lng:6.0795,p:['Welcome','Plaidoyer','Emploi','Sante','Sensibilisation'],b:{Welcome:2,Juridique:100,Emploi:1,Sensibilisation:10},tb:113,v:{Welcome:22,Juridique:7,Emploi:3,Sensibilisation:5},tv:37,acc:2,nuit:534,lx:25,lxe:10,ac:2,cdm:'Thomas',sc:{total:2.39,welcome:2.78,prog:3,vitalite:2,coordo:1,acteurs:4}},
+{n:'Herault',lat:43.6108,lng:3.8767,p:['Welcome','Juridique'],b:{Welcome:16,'Ecole de francais':4},tb:20,v:{Welcome:87,'Ecole de francais':1},tv:88,acc:16,nuit:1642,lx:45,lxe:40,ac:7,cdm:'Madeleine',sc:{total:2.53,welcome:2.77,prog:1,vitalite:3,coordo:2,acteurs:3}},
+{n:'Isere',lat:45.1885,lng:5.7245,p:['Welcome','Mise a disposition','Plaidoyer','Emploi','Sensibilisation','JRS Jeunes'],b:{Welcome:17,Emploi:17,'JRS Jeunes':15,Sensibilisation:50},tb:99,v:{Welcome:132,Emploi:3,'Ecole de francais':5,Sensibilisation:12},tv:152,acc:17,nuit:1535,lx:72,lxe:61,ac:10,cdm:'Sophie',sc:{total:3.39,welcome:2.77,prog:4,vitalite:4,coordo:4,acteurs:4}},
+{n:'Laval',lat:48.0735,lng:-0.7714,p:['Welcome','Emploi','Sensibilisation'],b:{Welcome:2,Emploi:1,Sensibilisation:17},tb:20,v:{Welcome:16,Emploi:2,Sensibilisation:6},tv:24,acc:2,nuit:174,lx:10,lxe:7,ac:2,cdm:'Amans',sc:{total:2.97,welcome:3.04,prog:1,vitalite:2,coordo:4,acteurs:2}},
+{n:'Le Mans',lat:48.006,lng:0.1996,p:['Welcome','Ruralite','Emploi','Sensibilisation'],b:{Welcome:5,Emploi:2,Sensibilisation:130},tb:137,v:{Welcome:41,Emploi:2,Sensibilisation:7},tv:50,acc:5,nuit:613,lx:18,lxe:18,ac:5,cdm:'Amans',sc:{total:3.67,welcome:4.34,prog:1,vitalite:3,coordo:3,acteurs:4}},
+{n:'Limoges',lat:45.8336,lng:1.2611,p:['Welcome','JRS Jeunes','Ecole de francais','Emploi'],b:{Welcome:4,'JRS Jeunes':100,'Ecole de francais':11,Emploi:2},tb:117,v:{Welcome:22,'Ecole de francais':10,Emploi:1},tv:33,acc:4,nuit:673,lx:14,lxe:10,ac:2,cdm:'Thomas',sc:{total:3.21,welcome:2.71,prog:3,vitalite:4,coordo:4,acteurs:3}},
+{n:'Loire-Atlantique',lat:47.2184,lng:-1.5536,p:['Welcome','Courts sejours','JRS Jeunes','Ecole de francais','Plaidoyer','Juridique','Emploi','Sensibilisation'],b:{Welcome:9,Juridique:10,'Ecole de francais':62,'JRS Jeunes':20,Emploi:25,Sensibilisation:640},tb:766,v:{Welcome:51,Juridique:1,'Ecole de francais':16,Emploi:5},tv:73,acc:9,nuit:706,lx:0,lxe:23,ac:5,cdm:'Madeleine',sc:{total:3.26,welcome:2.42,prog:5,vitalite:5,coordo:4,acteurs:3}},
+{n:'Lyon',lat:45.764,lng:4.8357,p:['Welcome','Mise a disposition','JRS Jeunes','Ecole de francais','Plaidoyer','Juridique','Emploi','Sensibilisation'],b:{Welcome:28,Juridique:28,'Ecole de francais':7,'JRS Jeunes':40,Emploi:41},tb:144,v:{Welcome:99,Juridique:6,'Ecole de francais':6,Emploi:2},tv:113,acc:28,nuit:3879,lx:63,lxe:40,ac:19,cdm:'Amans',sc:{total:3.95,welcome:3.60,prog:5,vitalite:5,coordo:4,acteurs:4}},
+{n:'Metz',lat:49.1193,lng:6.1757,p:['Welcome','Mise a disposition','Courts sejours','Ecole de francais','Plaidoyer','Juridique','Emploi','Sensibilisation'],b:{Welcome:3,Juridique:54,'Ecole de francais':80,Emploi:10,Sensibilisation:62},tb:209,v:{Welcome:41,Juridique:5,'Ecole de francais':10,Emploi:2,Sensibilisation:1},tv:59,acc:3,nuit:454,lx:37,lxe:19,ac:3,cdm:'Jeanne',sc:{total:3.46,welcome:1.91,prog:5,vitalite:5,coordo:5,acteurs:5}},
+{n:'Nancy',lat:48.6921,lng:6.1844,p:[],b:{},tb:0,v:{},tv:0,acc:0,nuit:0,lx:0,lxe:0,ac:0,cdm:'-',sc:{total:0,welcome:0,prog:0,vitalite:0,coordo:0,acteurs:0}},
+{n:'Orleans',lat:47.9029,lng:1.9039,p:['Welcome'],b:{Welcome:2},tb:2,v:{Welcome:13},tv:13,acc:2,nuit:129,lx:10,lxe:6,ac:1,cdm:'Madeleine',sc:{total:2.37,welcome:2.94,prog:0,vitalite:2,coordo:2,acteurs:2}},
+{n:'Paris',lat:48.8566,lng:2.3522,p:['Welcome','Mise a disposition','Courts sejours','JRS Jeunes','Ecole de francais','Juridique','Emploi','Sante','Sensibilisation'],b:{Welcome:22,Juridique:285,'Ecole de francais':106,'JRS Jeunes':1000,Emploi:233,Sensibilisation:75},tb:1721,v:{Welcome:161,Juridique:20,'Ecole de francais':48,Emploi:9,Sensibilisation:2},tv:240,acc:22,nuit:3691,lx:103,lxe:69,ac:23,cdm:'Lucie',sc:{total:3.12,welcome:2.54,prog:4,vitalite:5,coordo:3,acteurs:4}},
+{n:'Pays Basque',lat:43.4832,lng:-1.5586,p:['Welcome','Mise a disposition','Sante'],b:{Welcome:2},tb:2,v:{Welcome:16},tv:16,acc:2,nuit:262,lx:8,lxe:7,ac:2,cdm:'Jeanne',sc:{total:2.53,welcome:3.46,prog:0,vitalite:1,coordo:2,acteurs:2}},
+{n:'Saint-Etienne',lat:45.4397,lng:4.3872,p:['Welcome','JRS Jeunes'],b:{Welcome:7},tb:7,v:{Welcome:52},tv:52,acc:7,nuit:758,lx:24,lxe:22,ac:8,cdm:'Jeanne',sc:{total:3.35,welcome:3.49,prog:0,vitalite:3,coordo:4,acteurs:3}},
+{n:'Savoie',lat:45.5646,lng:5.9178,p:['Welcome','Sensibilisation','JRS Jeunes'],b:{Welcome:5,'JRS Jeunes':50},tb:55,v:{Welcome:36,Sensibilisation:2},tv:38,acc:5,nuit:556,lx:23,lxe:16,ac:4,cdm:'Sophie',sc:{total:3.28,welcome:3.46,prog:2,vitalite:3,coordo:3,acteurs:4}},
+{n:'Strasbourg',lat:48.5734,lng:7.7521,p:['Welcome','Plaidoyer'],b:{Welcome:2},tb:2,v:{Welcome:22},tv:22,acc:2,nuit:231,lx:54,lxe:10,ac:2,cdm:'Madeleine',sc:{total:3.10,welcome:3.11,prog:2,vitalite:3,coordo:3,acteurs:4}},
+{n:'Toulouse',lat:43.6047,lng:1.4442,p:['Welcome','Mise a disposition','JRS Jeunes','Plaidoyer','Sante','Sensibilisation'],b:{Welcome:36,'JRS Jeunes':55,Sensibilisation:50},tb:141,v:{Welcome:114,Sensibilisation:4},tv:118,acc:36,nuit:4072,lx:102,lxe:47,ac:20,cdm:'Amans',sc:{total:3.89,welcome:3.29,prog:5,vitalite:5,coordo:4,acteurs:5}},
+{n:'Tours',lat:47.3941,lng:0.6848,p:['Welcome'],b:{Welcome:4},tb:4,v:{Welcome:37},tv:37,acc:4,nuit:627,lx:25,lxe:17,ac:3,cdm:'Madeleine',sc:{total:3.44,welcome:3.18,prog:0,vitalite:3,coordo:5,acteurs:3}},
+{n:'Valenciennes',lat:50.3597,lng:3.5232,p:['Welcome','Juridique','Emploi'],b:{Welcome:3,Juridique:1},tb:4,v:{Welcome:18,Juridique:1},tv:19,acc:3,nuit:413,lx:12,lxe:8,ac:2,cdm:'Madeleine',sc:{total:3.02,welcome:4.15,prog:2,vitalite:2,coordo:1,acteurs:4}},
+{n:'Vaucluse',lat:44.0577,lng:4.8055,p:['Welcome','Juridique','Sensibilisation'],b:{Welcome:4,Juridique:2,Sensibilisation:50},tb:56,v:{Welcome:22,Juridique:4,Sensibilisation:2},tv:28,acc:4,nuit:476,lx:16,lxe:10,ac:2,cdm:'Jeanne',sc:{total:2.07,welcome:2.65,prog:2,vitalite:1,coordo:1,acteurs:3}},
+{n:'Yvelines',lat:48.8048,lng:1.9888,p:['Welcome','Emploi','Sante'],b:{Welcome:22,Emploi:6},tb:28,v:{Welcome:166,Emploi:1},tv:167,acc:22,nuit:4745,lx:140,lxe:74,ac:18,cdm:'Sophie',sc:{total:3.83,welcome:3.45,prog:3,vitalite:4,coordo:5,acteurs:3}}
+];
+
+var map,markers=[],aF=null,cV='programmes',selA=null;
+
+function init(){initMap();rKPI();rF();rBar();rLeg();plot()}
+
+function initMap(){
+  map=L.map('map',{center:[46.6,2.5],zoom:6,zoomControl:false,attributionControl:false});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:18}).addTo(map);
+  L.control.zoom({position:'topright'}).addTo(map);
+  setTimeout(function(){map.invalidateSize()},200);
+  window.addEventListener('resize',function(){map.invalidateSize()});
+}
+
+function gv(a){
+  if(cV==='beneficiaires'){if(aF)return a.b[aF]||0;return a.tb}
+  if(cV==='benevoles'){if(aF)return a.v[aF]||0;return a.tv}
+  if(cV==='scoring')return a.sc.total;
+  return a.p.length;
+}
+function gr(v){
+  if(cV==='scoring')return 14;
+  if(cV==='cdm')return 12;
+  if(cV==='programmes'){if(v===0)return 5;if(v<=2)return 8;if(v<=4)return 12;if(v<=6)return 16;return 20}
+  if(v===0)return 4;var mx=Math.max.apply(null,D.map(gv));if(mx===0)return 4;
+  return Math.max(6,Math.min(32,6+Math.sqrt(v/mx)*26));
+}
+function scCol(v){if(v>=4)return'#16A34A';if(v>=3.5)return'#65A30D';if(v>=3)return'#D97706';if(v>=2.5)return'#F59E0B';if(v>=2)return'#EA580C';return'#DC2626'}
+function gc(a){
+  if(cV==='scoring')return scCol(a.sc.total);
+  if(cV==='cdm')return CDM_COLORS[a.cdm]||'#ccc';
+  if(aF)return a.p.indexOf(aF)>=0?PR[aF].c:'#ddd';
+  if(cV==='beneficiaires')return'#7C3AED';if(cV==='benevoles')return'#0D9488';
+  var n=a.p.length;if(n===0)return'#ddd';if(n<=2)return'#93C5FD';if(n<=4)return'#3B82F6';if(n<=6)return'#1D4ED8';return'#1E3A5F';
+}
+
+function plot(){
+  markers.forEach(function(m){map.removeLayer(m)});markers=[];
+  D.forEach(function(a){
+    if(!a.p.length&&(aF||cV==='scoring'))return;if(aF&&a.p.indexOf(aF)<0)return;
+    var v=gv(a),r=gr(v),c=gc(a);
+    if(cV!=='programmes'&&cV!=='scoring'&&cV!=='cdm'&&v===0&&aF)return;
+    var sn=(cV==='scoring');
+    var label='';
+    if(sn)label=a.sc.total.toFixed(1);
+    else if(r>13&&cV!=='programmes'&&cV!=='cdm')label=v.toLocaleString('fr');
+    var fs=sn?9:(label?Math.max(8,Math.min(10,r/2.2)):0);
+    var h='<div class="cm" style="width:'+r*2+'px;height:'+r*2+'px;border-radius:50%;background:'+c+';opacity:.88;display:flex;align-items:center;justify-content:center;color:#fff;font-size:'+fs+'px;font-weight:600;line-height:1">'+label+'</div>';
+    var ic=L.divIcon({className:'',html:h,iconSize:[r*2,r*2],iconAnchor:[r,r]});
+    var m=L.marker([a.lat,a.lng],{icon:ic}).addTo(map);
+    var pb=a.p.map(function(p){return'<span class="pb" style="background:'+PR[p].c+'15;color:'+PR[p].c+'">'+PR[p].s+'</span>'}).join('');
+    m.bindPopup('<div class="pi"><div class="pn">'+a.n+'</div><div class="pst">CdM : '+a.cdm+' - Score : '+a.sc.total.toFixed(1)+'/5</div><div class="pst"><b>'+a.tb+'</b> benef. - <b>'+a.tv+'</b> benev.</div><div class="pst">'+a.acc+' accueillis - '+a.nuit.toLocaleString('fr')+' nuitees</div><div class="pp">'+pb+'</div></div>',{closeButton:false});
+    m.on('click',function(){selA=a;rKPI();showD(a)});markers.push(m);
+  });
+}
+
+function rKPI(){
+  var el=document.getElementById('kg'),tl=document.getElementById('kpi-title'),rb=document.getElementById('kpi-reset');
+  if(selA){
+    var a=selA;
+    tl.textContent=a.n;
+    rb.classList.add('vis');
+    el.innerHTML=[
+      {v:a.p.length,l:'Programmes actifs',c:'var(--blue)'},
+      {v:a.sc.total.toFixed(1)+'/5',l:'Score global',c:scCol(a.sc.total)},
+      {v:a.tb,l:'Beneficiaires',c:'var(--purple)'},
+      {v:a.tv,l:'Benevoles',c:'var(--teal)'},
+      {v:a.acc,l:'Accueillis Welcome',c:'var(--blue)'},
+      {v:a.nuit.toLocaleString('fr'),l:'Nuitees Welcome',c:'var(--blue)'},
+      {v:a.lx,l:"Lieux d'accueil",s:a.lxe+' ayant accueilli',c:'var(--sky)'},
+      {v:a.ac,l:'Accompagnateurs',c:'var(--green)'}
+    ].map(function(k){return'<div class="kc"><div class="kv" style="color:'+k.c+'">'+k.v+'</div><div class="kl">'+k.l+'</div>'+(k.s?'<div class="ks">'+k.s+'</div>':'')+'</div>'}).join('');
+  } else {
+    tl.textContent='Chiffres cles nationaux';
+    rb.classList.remove('vis');
+    el.innerHTML=[
+      {v:'34',l:'Antennes actives',c:'var(--coral)'},{v:'3 558',l:'Benevoles engages',c:'var(--teal)'},
+      {v:'276',l:'Accueillis Welcome',c:'var(--blue)'},{v:'35 674',l:'Nuitees Welcome',c:'var(--blue)'},
+      {v:'1 090',l:"Lieux d'accueil",s:'702 ayant accueilli',c:'var(--sky)'},{v:'182',l:'Accompagnateurs',s:'71% retraites',c:'var(--green)'},
+      {v:'505',l:'Suivis juridiques',s:'11 antennes',c:'var(--coral)'},{v:'390',l:'Eleves FLE',s:'126 benevoles',c:'var(--amber)'},
+      {v:'1 761',l:'Participants JRS Jeunes',s:'921 activites',c:'var(--purple)'},{v:'1 617',l:'Personnes sensibilisees',s:'48 interventions',c:'var(--lime)'},
+      {v:'3 602',l:'Accueillis Oasis',s:'180 jours, S1',w:1,c:'var(--pink)'}
+    ].map(function(k){return'<div class="kc'+(k.w?' w':'')+'"><div class="kv" style="color:'+k.c+'">'+k.v+'</div><div class="kl">'+k.l+'</div>'+(k.s?'<div class="ks">'+k.s+'</div>':'')+'</div>'}).join('');
+  }
+}
+
+function resetKPI(){selA=null;rKPI();document.getElementById('ad').classList.remove('vis')}
+
+function rF(){
+  var el=document.getElementById('fc');
+  var h='<button class="ch'+(!aF?' on':'')+'" style="'+(!aF?'background:var(--tp);color:#fff;':'')+'" onclick="setFi(null)">Tous</button>';
+  Object.keys(PR).forEach(function(n){var p=PR[n];h+='<button class="ch'+(aF===n?' on':'')+'" style="'+(aF===n?'background:'+p.c+';color:#fff;border-color:'+p.c+';':'')+'" onclick="setFi(\''+n+'\')">'+p.s+'</button>'});
+  el.innerHTML=h;
+}
+
+function setFi(p){aF=p;rF();plot();rBar()}
+function setV(v){cV=v;document.querySelectorAll('.vb').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-v')===v)});rLeg();plot();rBar()}
+
+function rBar(){
+  var el=document.getElementById('bc'),tl=document.getElementById('bt');
+  var lbl,color;
+  if(cV==='beneficiaires'){lbl='Beneficiaires par antenne';color='#7C3AED'}
+  else if(cV==='benevoles'){lbl='Benevoles par antenne';color='#0D9488'}
+  else if(cV==='scoring'){lbl='Score par antenne';color='#D97706'}
+  else{lbl='Programmes par antenne';color='#2563EB'}
+  if(aF)color=PR[aF].c;tl.textContent=lbl;
+  var data=D.filter(function(a){return a.p.length>0}).map(function(a){return{name:a.n,count:gv(a),sc:a.sc.total,cdm:a.cdm}});
+  if(cV==='scoring')data.sort(function(a,b){return b.sc-a.sc});
+  else data=data.filter(function(d){return d.count>0}).sort(function(a,b){return b.count-a.count});
+  data=data.slice(0,15);
+  var mx=cV==='scoring'?5:Math.max.apply(null,data.map(function(d){return d.count}));
+  el.innerHTML=data.map(function(d){
+    var val=cV==='scoring'?d.sc:d.count;
+    var pct=val/mx*100;
+    var c=cV==='scoring'?scCol(d.sc):(cV==='cdm'?CDM_COLORS[d.cdm]:color);
+    var dn=d.name.length>13?d.name.slice(0,12)+'.':d.name;
+    var dv=cV==='scoring'?d.sc.toFixed(1):d.count.toLocaleString('fr');
+    return'<div class="br"><div class="bl">'+dn+'</div><div class="btr"><div class="bfi" style="width:'+pct+'%;background:'+c+';opacity:.7"></div></div><div class="bn">'+dv+'</div></div>';
+  }).join('');
+}
+
+function rLeg(){
+  var el=document.getElementById('ml');
+  if(cV==='programmes')el.innerHTML='<div class="mlt">Taille = nb de programmes</div>'+[{l:'1-2',s:8},{l:'3-4',s:12},{l:'5-6',s:16},{l:'7+',s:20}].map(function(i){return'<div class="mli"><div class="ld" style="width:'+i.s+'px;height:'+i.s+'px;background:#3B82F6"></div>'+i.l+' prog.</div>'}).join('');
+  else if(cV==='beneficiaires')el.innerHTML='<div class="mlt">Taille = beneficiaires</div><div class="mli" style="font-size:8px;color:var(--tt)">Cercle proportionnel</div>';
+  else if(cV==='benevoles')el.innerHTML='<div class="mlt">Taille = benevoles</div><div class="mli" style="font-size:8px;color:var(--tt)">Cercle proportionnel</div>';
+  else if(cV==='scoring')el.innerHTML='<div class="mlt">Couleur = score global /5</div>'+[{l:'4+ Solide',c:'#16A34A'},{l:'3-4 Correct',c:'#D97706'},{l:'2-3 Fragile',c:'#F59E0B'},{l:'<2 Critique',c:'#DC2626'}].map(function(i){return'<div class="mli"><div class="ld" style="width:10px;height:10px;background:'+i.c+'"></div>'+i.l+'</div>'}).join('');
+  else if(cV==='cdm')el.innerHTML='<div class="mlt">Couleur = charge de mission</div>'+Object.keys(CDM_COLORS).filter(function(k){return k!=='-'}).map(function(k){return'<div class="mli"><div class="ld" style="width:10px;height:10px;background:'+CDM_COLORS[k]+'"></div>'+k+'</div>'}).join('');
+}
+
+function showD(a){
+  var d=document.getElementById('ad');
+  var pb=a.p.map(function(p){return'<span class="pb" style="background:'+PR[p].c+'20;color:'+PR[p].c+'">'+PR[p].s+'</span>'}).join('');
+  var sh='<div class="asi"><div class="asv" style="color:var(--purple)">'+a.tb+'</div><div class="asl">Beneficiaires</div></div>';
+  sh+='<div class="asi"><div class="asv" style="color:var(--teal)">'+a.tv+'</div><div class="asl">Benevoles</div></div>';
+  if(a.acc>0)sh+='<div class="asi"><div class="asv">'+a.acc+'</div><div class="asl">Accueillis Welcome</div></div>';
+  if(a.nuit>0)sh+='<div class="asi"><div class="asv">'+a.nuit.toLocaleString('fr')+'</div><div class="asl">Nuitees</div></div>';
+  // Scoring
+  var dims=[{k:'welcome',l:'Welcome'},{k:'vitalite',l:'Vitalite'},{k:'coordo',l:'Coordination'},{k:'acteurs',l:'Partenaires'},{k:'prog',l:'Nb prog.'}];
+  var scH='<div style="margin-top:8px"><div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px"><div class="ts-big" style="color:'+scCol(a.sc.total)+'">'+a.sc.total.toFixed(1)+'</div><div class="ts-label">/ 5 - Score global</div></div>';
+  dims.forEach(function(dim){var val=a.sc[dim.k];var dots='';for(var i=1;i<=5;i++){var f=i<=Math.round(val);dots+='<div class="score-dot'+(f?' on':'')+'" style="'+(f?'background:'+scCol(val):'')+'"></div>'}scH+='<div class="score-row"><div class="score-label">'+dim.l+'</div><div class="score-dots">'+dots+'</div><div class="score-val" style="color:'+scCol(val)+'">'+Math.round(val)+'</div></div>'});
+  scH+='</div>';
+  // Breakdown
+  var bk='<div style="margin-top:8px"><div style="font-size:7px;text-transform:uppercase;letter-spacing:1px;color:var(--tt);margin-bottom:3px">Detail par programme</div>';
+  bk+='<div style="display:flex;gap:2px;font-size:7px;color:var(--tt);margin-bottom:2px;padding-left:10px"><span style="flex:1"></span><span style="width:36px;text-align:right">benef.</span><span style="width:36px;text-align:right">benev.</span></div>';
+  a.p.forEach(function(p){var be=a.b[p]||0,vo=a.v[p]||0;bk+='<div style="display:flex;align-items:center;gap:3px;margin-bottom:1px;font-size:8px"><span style="width:5px;height:5px;border-radius:50%;background:'+PR[p].c+';flex-shrink:0"></span><span style="flex:1;color:var(--ts)">'+PR[p].s+'</span><span style="color:var(--purple);font-weight:500;width:36px;text-align:right">'+be+'</span><span style="color:var(--teal);font-weight:500;width:36px;text-align:right">'+vo+'</span></div>'});
+  bk+='</div>';
+  d.innerHTML='<button class="cb" onclick="closeD()">&times;</button><div class="cdm-tag" style="background:'+CDM_COLORS[a.cdm]+'18;color:'+CDM_COLORS[a.cdm]+'">CdM : '+a.cdm+'</div><div class="an">'+a.n+'</div><div style="font-size:9px;color:var(--ts)">'+a.p.length+' programme'+(a.p.length>1?'s':'')+' actif'+(a.p.length>1?'s':'')+'</div><div class="ap">'+pb+'</div><div class="as">'+sh+'</div>'+scH+bk;
+  d.classList.add('vis');
+}
+
+function closeD(){document.getElementById('ad').classList.remove('vis');selA=null;rKPI()}
+init();
+</script>
+</body>
+</html>
